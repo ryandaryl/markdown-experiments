@@ -8,14 +8,14 @@ def format_tilde_lists(html)
         x.to_s.gsub(/\n +?~ +?/, '').delete("\n"), input: 'GFM'
       ).to_html
     end
-    attributes = list_items.each_with_index.map do |_x, i|
+    attributes = list_items.each_with_index.map do |_, i|
       "position: absolute; left: #{
-        i * (100 / (list_items.length - 1))}%"
+        i * (100 / (list_items.length - 1)) - 10}%\" class=\"post-meta"
     end
     attributes[0] = 'float: left'
     attributes[-1] = 'float: right'
     div_list = list_items.zip(attributes).map { |item, attribute| "<div style=\"#{attribute}\">#{item}</div>" }
-    inline_list = "<div style=\"overflow: auto; position: relative;\">#{div_list.join('')}</div>\n"
+    inline_list = "<div class=\"post-preview\" style=\"overflow: auto; position: relative;\">#{div_list.join('')}</div>\n"
     output << text_before + inline_list + text_after
   end
   output
