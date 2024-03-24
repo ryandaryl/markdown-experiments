@@ -8,3 +8,7 @@ Add the example CV markdown from OhMyCV to index.markdown (or any markdown page)
 Add a key to the top of the front matter in the markdown file:
 layout: default
 
+Make a directory called "_plugins" in the blog root, and add the "cv_converter.rb" file.
+In _config.yml, add the following line:
+markdown: CVProcessor
+
