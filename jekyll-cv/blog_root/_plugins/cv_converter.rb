@@ -1,3 +1,30 @@
+def resolve_header(html, frontmatter)
+  # Port of resolveHeader function from Oh My CV:
+  # https://github.com/Renovamen/oh-my-cv/blob/891c884c53cdf96c17a4cde94934cd0a4898c57a/site/src/utils/markdown.ts#L44-L71
+  header = ''
+  header += "<h1>#{frontmatter['name']}</h1>\n" if frontmatter['name']
+
+  if frontmatter['header']
+    n = frontmatter['header'].length
+
+    (0...n).each do |i|
+      item = frontmatter['header'][i]
+      next unless item
+
+      header += item['new_line'] ? "<br>\n" : ''
+      header += "<span class=\"resume-header-item#{i == n - 1 || frontmatter['header'][i + 1]&.fetch('newLine', false) ? ' no-separator' : ''}\">"
+      header += if item['link']
+                  "<a href=\"#{item['link']}\" target=\"_blank\" rel=\"noopener noreferrer\">#{item['text']}</a>"
+                else
+                  item['text']
+                end
+      header += "</span>\n"
+    end
+  end
+
+  "<div class=\"resume-header\">#{header}</div>" + html
+end
+
 def format_tilde_lists(html)
   output = ''
   tilde_list_regex = /((?:.|\n)*?)(\n.+?)(\n +?~ .+?)(\n +?~ .+?)?(\n +?~ .+?)?\n((?:.|\n)*?)/
@@ -22,14 +49,20 @@ def format_tilde_lists(html)
 end
 
 class Jekyll::Converters::Markdown::CVProcessor
-  def initialize(_config)
+  def initialize(config)
     super()
+    Jekyll::Hooks.register :pages, :pre_render do |page|
+        @page_data = page.data
+    end
   end
 
   def convert(content)
     content = format_tilde_lists(content)
-    Kramdown::Document.new(
+    html = Kramdown::Document.new(
       content, input: 'GFM'
     ).to_html
+    if @page_data and @page_data.key?("header")
+      html = resolve_header(html, @page_data)
+    end
   end
 end
